@@ -39,8 +39,12 @@ export default function SignIn() {
     try {
       await signIn(email.trim(), password);
       router.replace('/(app)/(tabs)/home');
-    } catch {
-      setErrors({ email: 'Invalid credentials. Please try again.' });
+    } catch (err: any) {
+      if (err.message === 'NO_ACCOUNT') {
+        setErrors({ email: 'No account registered on this device. Please Sign Up first.' });
+      } else {
+        setErrors({ email: 'Invalid email or password. Please try again.' });
+      }
     } finally {
       setLoading(false);
     }

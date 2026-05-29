@@ -8,6 +8,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
+  const [isRegistered, setIsRegistered] = useState<boolean>(false);
 
   useEffect(() => {
     loadAuthState();
@@ -15,12 +16,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function loadAuthState() {
     try {
-      const [token, onboardingFlag] = await Promise.all([
+      const [token, onboardingFlag, rawReg] = await Promise.all([
         secureStorage.get(STORAGE_KEYS.AUTH_TOKEN),
         asyncStorage.get(STORAGE_KEYS.HAS_SEEN_ONBOARDING),
+        secureStorage.get(STORAGE_KEYS.REGISTERED_USER),
       ]);
 
       setHasSeenOnboarding(onboardingFlag === 'true');
+      setIsRegistered(!!rawReg);
 
       if (token) {
         const raw = await asyncStorage.get(STORAGE_KEYS.USER_DATA);
@@ -33,8 +36,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  async function signIn(email: string, _password: string) {
-    const mockUser: User = { id: '1', email, name: email.split('@')[0] };
+  async function signIn(email: string, password: string) {
+    const rawReg = await secureStorage.get(STORAGE_KEYS.REGISTERED_USER);
+    if (!rawReg) {
+      throw new Error('NO_ACCOUNT');
+    }
+
+    const reg = JSON.parse(rawReg);
+    if (reg.email.trim().toLowerCase() !== email.trim().toLowerCase() || reg.password !== password) {
+      throw new Error('INVALID_CREDENTIALS');
+    }
+
+    const mockUser: User = { id: '1', email: reg.email, name: reg.name };
     const token = 'mock_token_' + Date.now();
     await Promise.all([
       secureStorage.set(STORAGE_KEYS.AUTH_TOKEN, token),
@@ -43,13 +56,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(mockUser);
   }
 
-  async function signUp(name: string, email: string, _password: string) {
+  async function signUp(name: string, email: string, password: string) {
     const mockUser: User = { id: '1', email, name };
     const token = 'mock_token_' + Date.now();
+    const registrationDetails = { name, email, password };
+
     await Promise.all([
+      secureStorage.set(STORAGE_KEYS.REGISTERED_USER, JSON.stringify(registrationDetails)),
       secureStorage.set(STORAGE_KEYS.AUTH_TOKEN, token),
       asyncStorage.set(STORAGE_KEYS.USER_DATA, JSON.stringify(mockUser)),
     ]);
+    setIsRegistered(true);
     setUser(mockUser);
   }
 
@@ -78,6 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         isAuthenticated: !!user,
         hasSeenOnboarding,
+        isRegistered,
         signIn,
         signUp,
         signOut,

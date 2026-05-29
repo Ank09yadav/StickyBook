@@ -9,6 +9,7 @@ export type AuthContextType = {
   isLoading: boolean;
   isAuthenticated: boolean;
   hasSeenOnboarding: boolean | null;
+  isRegistered: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (name: string, email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;

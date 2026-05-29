@@ -34,6 +34,11 @@ export default function CustomDrawerContent(props: any) {
     router.replace('/(auth)/sign-in');
   };
 
+  const handleNavigate = (route: string) => {
+    router.navigate(route as any);
+    props.navigation.closeDrawer();
+  };
+
   return (
     <DrawerContentScrollView
       {...props}
@@ -60,7 +65,7 @@ export default function CustomDrawerContent(props: any) {
         <TouchableOpacity
           key={item.label}
           style={styles.navItem}
-          onPress={() => router.push(item.route as any)}
+          onPress={() => handleNavigate(item.route)}
           activeOpacity={0.7}
         >
           <Text style={styles.navIcon}>{item.icon}</Text>

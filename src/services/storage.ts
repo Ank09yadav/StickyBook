@@ -5,6 +5,7 @@ export const STORAGE_KEYS = {
   AUTH_TOKEN: 'auth_token',
   USER_DATA: 'user_data',
   HAS_SEEN_ONBOARDING: 'has_seen_onboarding',
+  REGISTERED_USER: 'registered_user',
 } as const;
 
 export const secureStorage = {
