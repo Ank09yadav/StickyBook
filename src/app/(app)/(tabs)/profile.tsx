@@ -101,7 +101,7 @@ export default function Profile() {
         <Text style={styles.signOutText}>Sign Out</Text>
       </TouchableOpacity>
 
-      <Text style={styles.version}>Spellbook v1.0.0</Text>
+      <Text style={styles.version}>StickyBook v1.0.0</Text>
     </ScrollView>
   );
 }

@@ -20,7 +20,7 @@ const SLIDES: Slide[] = [
   {
     id: '1',
     emoji: '📖',
-    title: 'Your Dev Spellbook',
+    title: 'Your Dev StickyBook',
     subtitle:
       'Save code snippets, links, and resources in one place — built for developers who move fast.',
     accentColor: Colors.primary,

@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Spellbook",
-    "slug": "Spellbook",
+    "name": "StickyBook",
+    "slug": "stickybook",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/spellBook-logo.png",
-    "scheme": "spellbook",
+    "scheme": "stickybook",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"

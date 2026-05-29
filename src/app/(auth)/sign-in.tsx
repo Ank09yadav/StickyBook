@@ -60,7 +60,7 @@ export default function SignIn() {
       >
         {/* Logo area */}
         <Text style={styles.logo}>📖</Text>
-        <Text style={styles.appName}>Spellbook</Text>
+        <Text style={styles.appName}>StickyBook</Text>
         <Text style={styles.tagline}>Welcome back, developer</Text>
 
         <View style={styles.card}>

@@ -59,7 +59,7 @@ export default function TabsLayout() {
 
 function getTitleForRoute(name: string): string {
   const map: Record<string, string> = {
-    home: 'Spellbook',
+    home: 'StickyBook',
     search: 'Search',
     files: 'Files',
     profile: 'Profile',
