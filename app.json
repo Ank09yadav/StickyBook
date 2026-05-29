@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Spellbook",
-    "slug": "Spellbook",
+    "name": "StickyBook",
+    "slug": "stickybook",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/spellbook-logo.png",
-    "scheme": "spellbook",
+    "icon": "./assets/images/spellBook-logo.png",
+    "scheme": "stickybook",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"
@@ -13,15 +13,15 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/spellbook-logo.png",
-        "backgroundImage": "./assets/images/spellbook-logo.png",
-        "monochromeImage": "./assets/images/spellbook-logo.png"
+        "foregroundImage": "./assets/images/spellBook-logo.png",
+        "backgroundImage": "./assets/images/spellBook-logo.png",
+        "monochromeImage": "./assets/images/spellBook-logo.png"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/spellbook-logo.png"
+      "favicon": "./assets/images/spellBook-logo.png"
     },
     "plugins": [
       "expo-router",
@@ -30,11 +30,12 @@
         {
           "backgroundColor": "#208AEF",
           "android": {
-            "image": "./assets/images/spellbook-logo.png",
+            "image": "./assets/images/spellBook-logo.png",
             "imageWidth": 76
           }
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

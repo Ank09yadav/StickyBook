@@ -1,5 +1,5 @@
 {
-  "name": "spellbook",
+  "name": "stickybook",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
@@ -11,8 +11,10 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-vector-icons/material-icons": "^13.1.2",
     "@react-navigation/bottom-tabs": "^7.15.5",
+    "@react-navigation/drawer": "^7.10.3",
     "@react-navigation/elements": "^2.9.10",
     "@react-navigation/native": "^7.1.33",
     "expo": "~55.0.26",
@@ -23,6 +25,7 @@
     "expo-image": "~55.0.11",
     "expo-linking": "~55.0.15",
     "expo-router": "~55.0.16",
+    "expo-secure-store": "~55.0.14",
     "expo-splash-screen": "~55.0.21",
     "expo-status-bar": "~55.0.6",
     "expo-symbols": "~55.0.9",
