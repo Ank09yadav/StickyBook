@@ -3,16 +3,15 @@ import { Stack } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { AuthProvider } from '../context/AuthContext';
+import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { Colors } from '../constants/theme';
 import { initDatabase } from '../services/db';
 
-export default function RootLayout() {
-  useEffect(() => {
-    initDatabase();
-  }, []);
+function RootLayoutContent() {
+  const { theme } = useTheme();
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: Colors.background }}>
+    <GestureHandlerRootView key={theme} style={{ flex: 1, backgroundColor: Colors.background }}>
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
           <AuthProvider>
@@ -26,5 +25,17 @@ export default function RootLayout() {
         </SafeAreaView>
       </SafeAreaProvider>
     </GestureHandlerRootView>
+  );
+}
+
+export default function RootLayout() {
+  useEffect(() => {
+    initDatabase();
+  }, []);
+
+  return (
+    <ThemeProvider>
+      <RootLayoutContent />
+    </ThemeProvider>
   );
 }

@@ -4,12 +4,14 @@ import { DrawerActions } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Spacing, FontSize } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 
 type Props = { title: string };
 
 export default function CustomHeader({ title }: Props) {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+  const { theme, toggleTheme } = useTheme();
 
   const openDrawer = () => {
     navigation.dispatch(DrawerActions.openDrawer());
@@ -17,12 +19,17 @@ export default function CustomHeader({ title }: Props) {
 
   return (
     <View style={[styles.header, { paddingTop: insets.top + Spacing.sm }]}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.surface} />
+      <StatusBar
+        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={Colors.surface}
+      />
       <TouchableOpacity onPress={openDrawer} style={styles.menuBtn} hitSlop={8}>
         <HamburgerIcon />
       </TouchableOpacity>
       <Text style={styles.title}>{title}</Text>
-      <View style={styles.menuBtn} />
+      <TouchableOpacity onPress={toggleTheme} style={styles.menuBtn} hitSlop={8} activeOpacity={0.75}>
+        <Text style={styles.toggleIcon}>{theme === 'dark' ? '☀️' : '🌙'}</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -47,7 +54,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
-  menuBtn: { width: 40, alignItems: 'center' },
+  menuBtn: { width: 40, alignItems: 'center', justifyContent: 'center' },
+  toggleIcon: { fontSize: 20 },
   title: {
     flex: 1,
     textAlign: 'center',

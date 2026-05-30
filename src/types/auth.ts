@@ -2,6 +2,7 @@ export type User = {
   id: string;
   email: string;
   name: string;
+  avatar?: string;
 };
 
 export type AuthContextType = {
@@ -15,4 +16,5 @@ export type AuthContextType = {
   signOut: () => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   completeOnboarding: () => Promise<void>;
+  updateProfile: (name: string, avatar?: string) => Promise<void>;
 };

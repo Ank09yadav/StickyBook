@@ -88,6 +88,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setHasSeenOnboarding(true);
   }
 
+  async function updateProfile(name: string, avatar?: string) {
+    if (!user) return;
+    const updatedUser = { ...user, name, avatar };
+    
+    // Update USER_DATA in AsyncStorage
+    await asyncStorage.set(STORAGE_KEYS.USER_DATA, JSON.stringify(updatedUser));
+    
+    // Update REGISTERED_USER in SecureStore to keep sync
+    const rawReg = await secureStorage.get(STORAGE_KEYS.REGISTERED_USER);
+    if (rawReg) {
+      const reg = JSON.parse(rawReg);
+      reg.name = name;
+      reg.avatar = avatar;
+      await secureStorage.set(STORAGE_KEYS.REGISTERED_USER, JSON.stringify(reg));
+    }
+    
+    setUser(updatedUser);
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -101,6 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signOut,
         sendPasswordReset,
         completeOnboarding,
+        updateProfile,
       }}
     >
       {children}

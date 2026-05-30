@@ -1,4 +1,4 @@
-export const Colors = {
+const DarkColors = {
   primary: '#208AEF',
   primaryLight: '#E6F4FE',
   primaryDark: '#1A6EC0',
@@ -18,6 +18,19 @@ export const Colors = {
   tabBar: '#161B22',
   tabBarBorder: '#21262D',
 };
+
+let activeColors = DarkColors;
+
+export function updateActiveColors(newColors: typeof DarkColors) {
+  activeColors = newColors;
+}
+
+// Export Colors as a Proxy that dynamically resolves properties to the current activeColors
+export const Colors = new Proxy(DarkColors, {
+  get(target, prop) {
+    return activeColors[prop as keyof typeof activeColors];
+  },
+});
 
 export const Spacing = {
   xs: 4,

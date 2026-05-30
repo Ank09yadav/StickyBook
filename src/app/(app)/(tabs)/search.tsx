@@ -17,6 +17,7 @@ import { useFocusEffect } from 'expo-router';
 import { Colors, Spacing, FontSize, BorderRadius } from '../../../constants/theme';
 import Toast from '../../../components/ui/Toast';
 import { getDbItems, addDbItem, updateDbItem, deleteDbItem, DbItem } from '../../../services/db';
+import SyntaxHighlighterText from '../../../components/ui/SyntaxHighlighter';
 
 const TAGS = ['All', 'React', 'TypeScript', 'DevOps', 'Database', 'CSS', 'Python'];
 const TYPES = [
@@ -47,6 +48,7 @@ export default function Search() {
 
   // File Extension state for Snippets
   const [fileExtension, setFileExtension] = useState('.jsx');
+  const [isEditingCode, setIsEditingCode] = useState(false);
 
   const insets = useSafeAreaInsets();
 
@@ -115,6 +117,7 @@ export default function Search() {
   const openEditModal = (item: DbItem) => {
     setEditingItem(item);
     setFileExtension(item.fileExtension || autoDeriveExtension(item.tag));
+    setIsEditingCode(false);
     setIsEditMode(true);
     setModalVisible(true);
   };
@@ -130,6 +133,7 @@ export default function Search() {
       emoji: '💡',
     });
     setFileExtension('.jsx');
+    setIsEditingCode(true);
     setIsEditMode(false);
     setModalVisible(true);
   };
@@ -520,16 +524,43 @@ export default function Search() {
               </Text>
 
               {editingItem?.type === 'snippet' ? (
-                <TextInput
-                  style={styles.codeEditor}
-                  value={editingItem?.content}
-                  onChangeText={(text) => setEditingItem((prev) => ({ ...prev, content: text }))}
-                  placeholder="Paste or write code here..."
-                  placeholderTextColor={Colors.textMuted}
-                  multiline
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
+                isEditingCode ? (
+                  <TextInput
+                    style={styles.codeEditor}
+                    value={editingItem?.content}
+                    onChangeText={(text) => setEditingItem((prev) => ({ ...prev, content: text }))}
+                    placeholder="Paste or write code here..."
+                    placeholderTextColor={Colors.textMuted}
+                    multiline
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                  />
+                ) : (
+                  <View style={styles.codeViewerContainer}>
+                    <View style={styles.codeViewerHeader}>
+                      <Text style={styles.codeViewerTitle}>
+                        📝 file{fileExtension}
+                      </Text>
+                      <TouchableOpacity
+                        style={styles.codeViewerCopyBtn}
+                        onPress={() => handleCopy(editingItem?.content || '', editingItem?.title || '')}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={styles.codeViewerCopyText}>Copy</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <ScrollView style={styles.codeViewerScroll} showsVerticalScrollIndicator={true}>
+                      <SyntaxHighlighterText code={editingItem?.content || ''} extension={fileExtension} />
+                    </ScrollView>
+                    <TouchableOpacity
+                      style={styles.codeViewerEditBtn}
+                      onPress={() => setIsEditingCode(true)}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.codeViewerEditText}>✏️ Edit Code</Text>
+                    </TouchableOpacity>
+                  </View>
+                )
               ) : (
                 <TextInput
                   style={styles.modalInput}
@@ -894,5 +925,60 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: BorderRadius.md,
+  },
+  codeViewerContainer: {
+    backgroundColor: '#070A13',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: BorderRadius.md,
+    overflow: 'hidden',
+    minHeight: 180,
+    marginBottom: Spacing.xs,
+  },
+  codeViewerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: Colors.surfaceAlt,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs + 2,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  codeViewerTitle: {
+    color: Colors.textSecondary,
+    fontFamily: 'Courier',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  codeViewerCopyBtn: {
+    backgroundColor: Colors.background,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+  },
+  codeViewerCopyText: {
+    color: Colors.text,
+    fontSize: 10,
+    fontWeight: '500',
+  },
+  codeViewerScroll: {
+    padding: Spacing.md,
+    maxHeight: 250,
+  },
+  codeViewerEditBtn: {
+    backgroundColor: Colors.primary + '18',
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    paddingVertical: Spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  codeViewerEditText: {
+    color: Colors.primary,
+    fontSize: FontSize.xs,
+    fontWeight: '600',
   },
 });
