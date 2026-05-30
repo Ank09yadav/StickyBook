@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Image,
 } from 'react-native';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
 import { router } from 'expo-router';

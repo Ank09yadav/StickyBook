@@ -12,6 +12,7 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FormInput from '../../components/ui/FormInput';
 import PrimaryButton from '../../components/ui/PrimaryButton';
+import Toast from '../../components/ui/Toast';
 import { useAuth } from '../../context/AuthContext';
 import { Colors, Spacing, FontSize, BorderRadius } from '../../constants/theme';
 
@@ -20,6 +21,9 @@ export default function SignIn() {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [loading, setLoading] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'warning' | 'info'>('info');
   const { signIn } = useAuth();
   const insets = useSafeAreaInsets();
 
@@ -41,7 +45,9 @@ export default function SignIn() {
       router.replace('/(app)/(tabs)/home');
     } catch (err: any) {
       if (err.message === 'NO_ACCOUNT') {
-        setErrors({ email: 'No account registered on this device. Please Sign Up first.' });
+        setToastMessage('No account registered on this device. Create one to get started!');
+        setToastType('warning');
+        setToastVisible(true);
       } else {
         setErrors({ email: 'Invalid email or password. Please try again.' });
       }
@@ -55,6 +61,14 @@ export default function SignIn() {
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      <Toast
+        visible={toastVisible}
+        message={toastMessage}
+        type={toastType}
+        actionLabel="Sign Up"
+        onAction={() => router.push('/(auth)/sign-up')}
+        onDismiss={() => setToastVisible(false)}
+      />
       <ScrollView
         contentContainerStyle={[
           styles.container,
@@ -96,7 +110,7 @@ export default function SignIn() {
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account? </Text>
+          <Text style={styles.footerText}>{"Don't have an account? "}</Text>
           <TouchableOpacity onPress={() => router.push('/(auth)/sign-up')}>
             <Text style={styles.footerLink}>Sign Up</Text>
           </TouchableOpacity>

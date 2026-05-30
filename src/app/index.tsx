@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/theme';
 
 export default function Index() {
-  const { isLoading, isAuthenticated, hasSeenOnboarding, isRegistered } = useAuth();
+  const { isLoading, isAuthenticated, hasSeenOnboarding } = useAuth();
 
   if (isLoading) {
     return (
@@ -15,7 +15,6 @@ export default function Index() {
   }
 
   if (!hasSeenOnboarding) return <Redirect href="/onboarding" />;
-  if (!isRegistered) return <Redirect href="/(auth)/sign-up" />;
   if (!isAuthenticated) return <Redirect href="/(auth)/sign-in" />;
   return <Redirect href="/(app)/(tabs)/home" />;
 }
