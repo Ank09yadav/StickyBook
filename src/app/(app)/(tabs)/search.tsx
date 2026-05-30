@@ -339,268 +339,463 @@ export default function Search() {
           style={styles.modalOverlay}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, isEditMode && { height: '90%' }]}>
             {/* Modal Header */}
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
                 {isEditMode ? 'Edit Resource' : 'Create Resource'}
               </Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeBtn}>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeBtn} activeOpacity={0.7}>
                 <Text style={styles.closeBtnText}>✕</Text>
               </TouchableOpacity>
             </View>
 
-            <ScrollView
-              contentContainerStyle={styles.modalScroll}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-            >
-              {/* Emoji & Title */}
-              <View style={styles.rowField}>
-                <TextInput
-                  style={styles.emojiInput}
-                  value={editingItem?.emoji}
-                  onChangeText={(text) => setEditingItem((prev) => ({ ...prev, emoji: text }))}
-                  placeholder="💡"
-                  maxLength={4}
-                />
-                <TextInput
-                  style={[styles.modalInput, styles.titleInput]}
-                  value={editingItem?.title}
-                  onChangeText={(text) => setEditingItem((prev) => ({ ...prev, title: text }))}
-                  placeholder="Title (e.g. useDebounce)"
-                  placeholderTextColor={Colors.textMuted}
-                />
-              </View>
-
-              {/* Description */}
-              <Text style={styles.fieldLabel}>Description</Text>
-              <TextInput
-                style={styles.modalInput}
-                value={editingItem?.description}
-                onChangeText={(text) => setEditingItem((prev) => ({ ...prev, description: text }))}
-                placeholder="What is this snippet or resource used for?"
-                placeholderTextColor={Colors.textMuted}
-                multiline
-              />
-
-              {/* Resource Type Selector */}
-              <Text style={styles.fieldLabel}>Resource Type</Text>
-              <View style={styles.typeSelectorRow}>
-                {TYPES.map((t) => (
-                  <TouchableOpacity
-                    key={t.value}
-                    style={[
-                      styles.typeSelectorBtn,
-                      editingItem?.type === t.value && styles.typeSelectorBtnActive,
-                    ]}
-                    onPress={() => setEditingItem((prev) => ({ ...prev, type: t.value }))}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.typeSelectorEmoji}>{t.emoji}</Text>
-                    <Text
-                      style={[
-                        styles.typeSelectorLabel,
-                        editingItem?.type === t.value && styles.typeSelectorLabelActive,
-                      ]}
-                    >
-                      {t.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {/* Folder Selection - Custom Dropdown ComboBox */}
-              <Text style={styles.fieldLabel}>Folder Name</Text>
-              <TouchableOpacity
-                style={styles.dropdownTrigger}
-                onPress={() => setTagDropdownOpen(!tagDropdownOpen)}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.dropdownTriggerText}>📂 {editingItem?.tag || 'React'}</Text>
-                <Text style={styles.dropdownChevron}>{tagDropdownOpen ? '▲' : '▼'}</Text>
-              </TouchableOpacity>
-
-              {tagDropdownOpen && (
-                <View style={styles.dropdownPanel}>
-                  {/* Inline Custom Input */}
-                  <View style={styles.customTagRow}>
+            {isEditMode ? (
+              // Beautiful Full-Page Viewer/Editor
+              <View style={styles.fullPageContainer}>
+                {/* Inline Header Details (Notion-style) */}
+                <View style={styles.fullPageHeader}>
+                  <View style={styles.fullPageTitleRow}>
                     <TextInput
-                      style={styles.customTagInput}
-                      value={customTagInput}
-                      onChangeText={setCustomTagInput}
-                      placeholder="Type folder name..."
-                      placeholderTextColor={Colors.textMuted}
-                      autoCapitalize="words"
+                      style={styles.fullPageEmojiInput}
+                      value={editingItem?.emoji}
+                      onChangeText={(text) => setEditingItem((prev) => ({ ...prev, emoji: text }))}
+                      placeholder="💡"
+                      maxLength={4}
                     />
-                    <TouchableOpacity
-                      style={styles.addTagBtn}
-                      onPress={() => {
-                        if (customTagInput.trim()) {
-                          const newTag = customTagInput.trim();
-                          setEditingItem((prev) => ({ ...prev, tag: newTag }));
-                          setFileExtension(autoDeriveExtension(newTag));
-                          setCustomTagInput('');
-                          setTagDropdownOpen(false);
-                        }
-                      }}
+                    <TextInput
+                      style={styles.fullPageTitleInput}
+                      value={editingItem?.title}
+                      onChangeText={(text) => setEditingItem((prev) => ({ ...prev, title: text }))}
+                      placeholder="Resource Title"
+                      placeholderTextColor={Colors.textMuted}
+                    />
+                  </View>
+                  
+                  <TextInput
+                    style={styles.fullPageDescInput}
+                    value={editingItem?.description}
+                    onChangeText={(text) => setEditingItem((prev) => ({ ...prev, description: text }))}
+                    placeholder="Add a description or note details..."
+                    placeholderTextColor={Colors.textMuted}
+                    multiline
+                  />
+
+                  <View style={styles.fullPageMetadataRow}>
+                    <TouchableOpacity 
+                      style={styles.fullPageBadge} 
+                      onPress={() => setTagDropdownOpen(!tagDropdownOpen)}
                       activeOpacity={0.8}
                     >
-                      <Text style={styles.addTagBtnText}>+ Add</Text>
+                      <Text style={styles.fullPageBadgeText}>📂 {editingItem?.tag || 'React'}</Text>
                     </TouchableOpacity>
+                    
+                    {editingItem?.type === 'snippet' && (
+                      <View style={styles.fullPageBadge}>
+                        <Text style={styles.fullPageBadgeText}>💻 {fileExtension}</Text>
+                      </View>
+                    )}
+
+                    <View style={[styles.fullPageBadge, { backgroundColor: editingItem?.type === 'snippet' ? Colors.primary + '15' : Colors.success + '15' }]}>
+                      <Text style={[styles.fullPageBadgeText, { color: editingItem?.type === 'snippet' ? Colors.primary : Colors.success }]}>
+                        {editingItem?.type === 'snippet' ? 'Code Snippet' : editingItem?.type === 'note' ? 'Dev Notes' : 'Web Link'}
+                      </Text>
+                    </View>
+                  </View>
+                  
+                  {/* Dynamic Folder Selector Dropdown inside Full-Page view if toggled */}
+                  {tagDropdownOpen && (
+                    <View style={styles.dropdownPanel}>
+                      <View style={styles.customTagRow}>
+                        <TextInput
+                          style={styles.customTagInput}
+                          value={customTagInput}
+                          onChangeText={setCustomTagInput}
+                          placeholder="Type folder name..."
+                          placeholderTextColor={Colors.textMuted}
+                          autoCapitalize="words"
+                        />
+                        <TouchableOpacity
+                          style={styles.addTagBtn}
+                          onPress={() => {
+                            if (customTagInput.trim()) {
+                              const newTag = customTagInput.trim();
+                              setEditingItem((prev) => ({ ...prev, tag: newTag }));
+                              setFileExtension(autoDeriveExtension(newTag));
+                              setCustomTagInput('');
+                              setTagDropdownOpen(false);
+                            }
+                          }}
+                          activeOpacity={0.8}
+                        >
+                          <Text style={styles.addTagBtnText}>+ Add</Text>
+                        </TouchableOpacity>
+                      </View>
+                      <Text style={styles.dropdownSectionLabel}>Existing Folders:</Text>
+                      <View style={styles.tagsGrid}>
+                        {existingTags.map((tag) => (
+                          <TouchableOpacity
+                            key={tag}
+                            style={[
+                              styles.modalTagItem,
+                              editingItem?.tag === tag && styles.modalTagItemActive,
+                            ]}
+                            onPress={() => {
+                              setEditingItem((prev) => ({ ...prev, tag }));
+                              setFileExtension(autoDeriveExtension(tag));
+                              setTagDropdownOpen(false);
+                            }}
+                            activeOpacity={0.8}
+                          >
+                            <Text
+                              style={[
+                                styles.modalTagText,
+                                editingItem?.tag === tag && styles.modalTagTextActive,
+                              ]}
+                            >
+                              {tag}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </View>
+                  )}
+                </View>
+
+                {/* Complete Full-Height Document Body */}
+                <View style={styles.fullPageBodyContainer}>
+                  <View style={styles.bodyHeader}>
+                    <Text style={styles.bodyHeaderTitle}>
+                      {editingItem?.type === 'snippet' ? `💻 file${fileExtension}` : '📝 Content Body'}
+                    </Text>
+                    <View style={styles.bodyHeaderActions}>
+                      {editingItem?.type === 'snippet' && (
+                        <TouchableOpacity
+                          style={styles.bodyActionBtn}
+                          onPress={() => handleCopy(editingItem?.content || '', editingItem?.title || '')}
+                          activeOpacity={0.7}
+                        >
+                          <Text style={styles.bodyActionText}>📋 Copy</Text>
+                        </TouchableOpacity>
+                      )}
+                      <TouchableOpacity
+                        style={[styles.bodyActionBtn, isEditingCode && styles.bodyActionBtnActive]}
+                        onPress={() => setIsEditingCode(!isEditingCode)}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[styles.bodyActionText, isEditingCode && styles.bodyActionTextActive]}>
+                          {isEditingCode ? '👁️ View' : '✏️ Edit'}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
 
-                  {/* Existing Folders Selection Grid */}
-                  <Text style={styles.dropdownSectionLabel}>Existing Folders:</Text>
-                  <View style={styles.tagsGrid}>
-                    {existingTags.map((tag) => (
-                      <TouchableOpacity
-                        key={tag}
+                  {editingItem?.type === 'snippet' ? (
+                    isEditingCode ? (
+                      <TextInput
+                        style={styles.fullPageCodeEditor}
+                        value={editingItem?.content}
+                        onChangeText={(text) => setEditingItem((prev) => ({ ...prev, content: text }))}
+                        placeholder="Write code here..."
+                        placeholderTextColor={Colors.textMuted}
+                        multiline
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                      />
+                    ) : (
+                      <View style={styles.fullPageCodeViewer}>
+                        <SyntaxHighlighterText code={editingItem?.content || ''} extension={fileExtension} />
+                      </View>
+                    )
+                  ) : (
+                    // For notes/links
+                    <TextInput
+                      style={styles.fullPageNoteEditor}
+                      value={editingItem?.content}
+                      onChangeText={(text) => setEditingItem((prev) => ({ ...prev, content: text }))}
+                      placeholder={editingItem?.type === 'link' ? 'https://example.com' : 'Write details here...'}
+                      placeholderTextColor={Colors.textMuted}
+                      multiline
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                    />
+                  )}
+                </View>
+
+                {/* Bottom Sticky Action Bar */}
+                <View style={styles.fullPageActions}>
+                  {editingItem?.id && (
+                    <TouchableOpacity
+                      style={[styles.fullPageBtn, styles.fullPageDeleteBtn]}
+                      onPress={() => handleDelete(editingItem.id!, editingItem.title || '')}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.fullPageDeleteBtnText}>🗑️ Delete</Text>
+                    </TouchableOpacity>
+                  )}
+                  <TouchableOpacity
+                    style={[styles.fullPageBtn, styles.fullPageSaveBtn]}
+                    onPress={handleSave}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.fullPageSaveBtnText}>💾 Save Changes</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              // Original Create Resource Wizard (Only first time / adding a resource)
+              <ScrollView
+                contentContainerStyle={styles.modalScroll}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+              >
+                {/* Emoji & Title */}
+                <View style={styles.rowField}>
+                  <TextInput
+                    style={styles.emojiInput}
+                    value={editingItem?.emoji}
+                    onChangeText={(text) => setEditingItem((prev) => ({ ...prev, emoji: text }))}
+                    placeholder="💡"
+                    maxLength={4}
+                  />
+                  <TextInput
+                    style={[styles.modalInput, styles.titleInput]}
+                    value={editingItem?.title}
+                    onChangeText={(text) => setEditingItem((prev) => ({ ...prev, title: text }))}
+                    placeholder="Title (e.g. useDebounce)"
+                    placeholderTextColor={Colors.textMuted}
+                  />
+                </View>
+
+                {/* Description */}
+                <Text style={styles.fieldLabel}>Description</Text>
+                <TextInput
+                  style={styles.modalInput}
+                  value={editingItem?.description}
+                  onChangeText={(text) => setEditingItem((prev) => ({ ...prev, description: text }))}
+                  placeholder="What is this snippet or resource used for?"
+                  placeholderTextColor={Colors.textMuted}
+                  multiline
+                />
+
+                {/* Resource Type Selector */}
+                <Text style={styles.fieldLabel}>Resource Type</Text>
+                <View style={styles.typeSelectorRow}>
+                  {TYPES.map((t) => (
+                    <TouchableOpacity
+                      key={t.value}
+                      style={[
+                        styles.typeSelectorBtn,
+                        editingItem?.type === t.value && styles.typeSelectorBtnActive,
+                      ]}
+                      onPress={() => setEditingItem((prev) => ({ ...prev, type: t.value }))}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.typeSelectorEmoji}>{t.emoji}</Text>
+                      <Text
                         style={[
-                          styles.modalTagItem,
-                          editingItem?.tag === tag && styles.modalTagItemActive,
+                          styles.typeSelectorLabel,
+                          editingItem?.type === t.value && styles.typeSelectorLabelActive,
                         ]}
+                      >
+                        {t.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {/* Folder Selection - Custom Dropdown ComboBox */}
+                <Text style={styles.fieldLabel}>Folder Name</Text>
+                <TouchableOpacity
+                  style={styles.dropdownTrigger}
+                  onPress={() => setTagDropdownOpen(!tagDropdownOpen)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.dropdownTriggerText}>📂 {editingItem?.tag || 'React'}</Text>
+                  <Text style={styles.dropdownChevron}>{tagDropdownOpen ? '▲' : '▼'}</Text>
+                </TouchableOpacity>
+
+                {tagDropdownOpen && (
+                  <View style={styles.dropdownPanel}>
+                    {/* Inline Custom Input */}
+                    <View style={styles.customTagRow}>
+                      <TextInput
+                        style={styles.customTagInput}
+                        value={customTagInput}
+                        onChangeText={setCustomTagInput}
+                        placeholder="Type folder name..."
+                        placeholderTextColor={Colors.textMuted}
+                        autoCapitalize="words"
+                      />
+                      <TouchableOpacity
+                        style={styles.addTagBtn}
                         onPress={() => {
-                          setEditingItem((prev) => ({ ...prev, tag }));
-                          setFileExtension(autoDeriveExtension(tag));
-                          setTagDropdownOpen(false);
+                          if (customTagInput.trim()) {
+                            const newTag = customTagInput.trim();
+                            setEditingItem((prev) => ({ ...prev, tag: newTag }));
+                            setFileExtension(autoDeriveExtension(newTag));
+                            setCustomTagInput('');
+                            setTagDropdownOpen(false);
+                          }
                         }}
                         activeOpacity={0.8}
                       >
-                        <Text
-                          style={[
-                            styles.modalTagText,
-                            editingItem?.tag === tag && styles.modalTagTextActive,
-                          ]}
-                        >
-                          {tag}
-                        </Text>
+                        <Text style={styles.addTagBtnText}>+ Add</Text>
                       </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
-              )}
+                    </View>
 
-              {/* Snippet File Extension selector */}
-              {editingItem?.type === 'snippet' && (
-                <>
-                  <Text style={styles.fieldLabel}>File Extension</Text>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.modalTagsScroll}
-                  >
-                    {POPULAR_EXTENSIONS.map((ext) => (
+                    {/* Existing Folders Selection Grid */}
+                    <Text style={styles.dropdownSectionLabel}>Existing Folders:</Text>
+                    <View style={styles.tagsGrid}>
+                      {existingTags.map((tag) => (
+                        <TouchableOpacity
+                          key={tag}
+                          style={[
+                            styles.modalTagItem,
+                            editingItem?.tag === tag && styles.modalTagItemActive,
+                          ]}
+                          onPress={() => {
+                            setEditingItem((prev) => ({ ...prev, tag }));
+                            setFileExtension(autoDeriveExtension(tag));
+                            setTagDropdownOpen(false);
+                          }}
+                          activeOpacity={0.8}
+                        >
+                          <Text
+                            style={[
+                              styles.modalTagText,
+                              editingItem?.tag === tag && styles.modalTagTextActive,
+                            ]}
+                          >
+                            {tag}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                )}
+
+                {/* Snippet File Extension selector */}
+                {editingItem?.type === 'snippet' && (
+                  <>
+                    <Text style={styles.fieldLabel}>File Extension</Text>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.modalTagsScroll}
+                    >
+                      {POPULAR_EXTENSIONS.map((ext) => (
+                        <TouchableOpacity
+                          key={ext}
+                          style={[
+                            styles.modalTagItem,
+                            fileExtension === ext && styles.modalTagItemActive,
+                          ]}
+                          onPress={() => setFileExtension(ext)}
+                          activeOpacity={0.8}
+                        >
+                          <Text
+                            style={[
+                              styles.modalTagText,
+                              fileExtension === ext && styles.modalTagTextActive,
+                            ]}
+                          >
+                            {ext}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </>
+                )}
+
+                {/* Code/Note Content Editor */}
+                <Text style={styles.fieldLabel}>
+                  {editingItem?.type === 'link'
+                    ? 'URL Link'
+                    : editingItem?.type === 'note'
+                    ? 'Notes Content'
+                    : 'Code Snippet Body'}
+                </Text>
+
+                {editingItem?.type === 'snippet' ? (
+                  isEditingCode ? (
+                    <TextInput
+                      style={styles.codeEditor}
+                      value={editingItem?.content}
+                      onChangeText={(text) => setEditingItem((prev) => ({ ...prev, content: text }))}
+                      placeholder="Paste or write code here..."
+                      placeholderTextColor={Colors.textMuted}
+                      multiline
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                    />
+                  ) : (
+                    <View style={styles.codeViewerContainer}>
+                      <View style={styles.codeViewerHeader}>
+                        <Text style={styles.codeViewerTitle}>
+                          📝 file{fileExtension}
+                        </Text>
+                        <TouchableOpacity
+                          style={styles.codeViewerCopyBtn}
+                          onPress={() => handleCopy(editingItem?.content || '', editingItem?.title || '')}
+                          activeOpacity={0.7}
+                        >
+                          <Text style={styles.codeViewerCopyText}>Copy</Text>
+                        </TouchableOpacity>
+                      </View>
+                      <ScrollView style={styles.codeViewerScroll} showsVerticalScrollIndicator={true}>
+                        <SyntaxHighlighterText code={editingItem?.content || ''} extension={fileExtension} />
+                      </ScrollView>
                       <TouchableOpacity
-                        key={ext}
-                        style={[
-                          styles.modalTagItem,
-                          fileExtension === ext && styles.modalTagItemActive,
-                        ]}
-                        onPress={() => setFileExtension(ext)}
+                        style={styles.codeViewerEditBtn}
+                        onPress={() => setIsEditingCode(true)}
                         activeOpacity={0.8}
                       >
-                        <Text
-                          style={[
-                            styles.modalTagText,
-                            fileExtension === ext && styles.modalTagTextActive,
-                          ]}
-                        >
-                          {ext}
-                        </Text>
+                        <Text style={styles.codeViewerEditText}>✏️ Edit Code</Text>
                       </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </>
-              )}
-
-              {/* Code/Note Content Editor */}
-              <Text style={styles.fieldLabel}>
-                {editingItem?.type === 'link'
-                  ? 'URL Link'
-                  : editingItem?.type === 'note'
-                  ? 'Notes Content'
-                  : 'Code Snippet Body'}
-              </Text>
-
-              {editingItem?.type === 'snippet' ? (
-                isEditingCode ? (
+                    </View>
+                  )
+                ) : (
                   <TextInput
-                    style={styles.codeEditor}
+                    style={styles.modalInput}
                     value={editingItem?.content}
                     onChangeText={(text) => setEditingItem((prev) => ({ ...prev, content: text }))}
-                    placeholder="Paste or write code here..."
+                    placeholder={
+                      editingItem?.type === 'link'
+                        ? 'https://example.com'
+                        : 'Paste or write notes content here...'
+                    }
                     placeholderTextColor={Colors.textMuted}
                     multiline
                     autoCapitalize="none"
                     autoCorrect={false}
                   />
-                ) : (
-                  <View style={styles.codeViewerContainer}>
-                    <View style={styles.codeViewerHeader}>
-                      <Text style={styles.codeViewerTitle}>
-                        📝 file{fileExtension}
-                      </Text>
-                      <TouchableOpacity
-                        style={styles.codeViewerCopyBtn}
-                        onPress={() => handleCopy(editingItem?.content || '', editingItem?.title || '')}
-                        activeOpacity={0.7}
-                      >
-                        <Text style={styles.codeViewerCopyText}>Copy</Text>
-                      </TouchableOpacity>
-                    </View>
-                    <ScrollView style={styles.codeViewerScroll} showsVerticalScrollIndicator={true}>
-                      <SyntaxHighlighterText code={editingItem?.content || ''} extension={fileExtension} />
-                    </ScrollView>
-                    <TouchableOpacity
-                      style={styles.codeViewerEditBtn}
-                      onPress={() => setIsEditingCode(true)}
-                      activeOpacity={0.8}
-                    >
-                      <Text style={styles.codeViewerEditText}>✏️ Edit Code</Text>
-                    </TouchableOpacity>
-                  </View>
-                )
-              ) : (
-                <TextInput
-                  style={styles.modalInput}
-                  value={editingItem?.content}
-                  onChangeText={(text) => setEditingItem((prev) => ({ ...prev, content: text }))}
-                  placeholder={
-                    editingItem?.type === 'link'
-                      ? 'https://example.com'
-                      : 'Paste or write notes content here...'
-                  }
-                  placeholderTextColor={Colors.textMuted}
-                  multiline
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
-              )}
-
-              {/* Action Buttons */}
-              <View style={styles.modalActions}>
-                {isEditMode && editingItem?.id && (
-                  <TouchableOpacity
-                    style={[styles.modalBtn, styles.deleteBtn]}
-                    onPress={() => handleDelete(editingItem.id!, editingItem.title || '')}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.deleteBtnText}>Delete</Text>
-                  </TouchableOpacity>
                 )}
 
-                <TouchableOpacity
-                  style={[styles.modalBtn, styles.saveBtn]}
-                  onPress={handleSave}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.saveBtnText}>
-                    {isEditMode ? 'Save Changes' : 'Create Item'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
+                {/* Action Buttons */}
+                <View style={styles.modalActions}>
+                  {isEditMode && editingItem?.id && (
+                    <TouchableOpacity
+                      style={[styles.modalBtn, styles.deleteBtn]}
+                      onPress={() => handleDelete(editingItem.id!, editingItem.title || '')}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.deleteBtnText}>Delete</Text>
+                    </TouchableOpacity>
+                  )}
+
+                  <TouchableOpacity
+                    style={[styles.modalBtn, styles.saveBtn]}
+                    onPress={handleSave}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.saveBtnText}>
+                      {isEditMode ? 'Save Changes' : 'Create Item'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            )}
           </View>
         </KeyboardAvoidingView>
       </Modal>
@@ -979,6 +1174,168 @@ const styles = StyleSheet.create({
   codeViewerEditText: {
     color: Colors.primary,
     fontSize: FontSize.xs,
+    fontWeight: '600',
+  },
+
+  // Premium Notion-style full-page editor/viewer
+  fullPageContainer: {
+    padding: Spacing.md,
+    gap: Spacing.md,
+    flex: 1,
+  },
+  fullPageHeader: {
+    gap: Spacing.xs,
+    paddingBottom: Spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  fullPageTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  fullPageEmojiInput: {
+    fontSize: FontSize.lg,
+    width: 44,
+    height: 44,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.background,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    textAlign: 'center',
+  },
+  fullPageTitleInput: {
+    flex: 1,
+    fontSize: FontSize.lg,
+    fontWeight: '700',
+    color: Colors.text,
+    paddingVertical: Spacing.xs,
+  },
+  fullPageDescInput: {
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+    paddingVertical: Spacing.xs,
+    minHeight: 40,
+    textAlignVertical: 'top',
+  },
+  fullPageMetadataRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+    marginTop: Spacing.xs,
+  },
+  fullPageBadge: {
+    backgroundColor: Colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: BorderRadius.full,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 4,
+  },
+  fullPageBadgeText: {
+    fontSize: FontSize.xs - 1,
+    color: Colors.textSecondary,
+    fontWeight: '600',
+  },
+  fullPageBodyContainer: {
+    flex: 1,
+    backgroundColor: '#070A13',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: BorderRadius.md,
+    overflow: 'hidden',
+    minHeight: 300,
+  },
+  bodyHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: Colors.surfaceAlt,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs + 2,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  bodyHeaderTitle: {
+    color: Colors.textSecondary,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    fontSize: FontSize.xs,
+    fontWeight: '600',
+  },
+  bodyHeaderActions: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  bodyActionBtn: {
+    backgroundColor: Colors.background,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 3,
+  },
+  bodyActionBtnActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  bodyActionText: {
+    color: Colors.text,
+    fontSize: 9,
+    fontWeight: '600',
+  },
+  bodyActionTextActive: {
+    color: Colors.white,
+  },
+  fullPageCodeViewer: {
+    flex: 1,
+  },
+  fullPageCodeEditor: {
+    flex: 1,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    fontSize: 13,
+    lineHeight: 18,
+    color: '#D4D4D4',
+    padding: Spacing.md,
+    textAlignVertical: 'top',
+  },
+  fullPageNoteEditor: {
+    flex: 1,
+    fontSize: FontSize.sm,
+    lineHeight: 20,
+    color: Colors.text,
+    padding: Spacing.md,
+    backgroundColor: Colors.background,
+    textAlignVertical: 'top',
+  },
+  fullPageActions: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    paddingTop: Spacing.sm,
+  },
+  fullPageBtn: {
+    flex: 1,
+    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.md - 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fullPageSaveBtn: {
+    backgroundColor: Colors.primary,
+  },
+  fullPageSaveBtnText: {
+    color: Colors.white,
+    fontSize: FontSize.sm,
+    fontWeight: '600',
+  },
+  fullPageDeleteBtn: {
+    flex: 0.35,
+    backgroundColor: Colors.error + '15',
+    borderWidth: 1,
+    borderColor: Colors.error + '35',
+  },
+  fullPageDeleteBtnText: {
+    color: Colors.error,
+    fontSize: FontSize.sm,
     fontWeight: '600',
   },
 });
