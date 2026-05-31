@@ -60,6 +60,43 @@ export default function Home() {
     return '.txt';
   };
 
+  const getExtensionEmoji = (ext: string | undefined): string => {
+    if (!ext) return '💻';
+    const cleanExt = ext.toLowerCase().trim();
+    switch (cleanExt) {
+      case '.py':
+        return '🐍';
+      case '.js':
+        return '🟨';
+      case '.ts':
+        return '🟦';
+      case '.jsx':
+      case '.tsx':
+        return '⚛️';
+      case '.html':
+        return '🌐';
+      case '.css':
+        return '🎨';
+      case '.json':
+        return '📦';
+      case '.sql':
+        return '🗄️';
+      case '.sh':
+      case '.bash':
+        return '🐚';
+      case '.rs':
+        return '🦀';
+      case '.go':
+        return '🐹';
+      case '.md':
+        return '📝';
+      case '.txt':
+        return '📄';
+      default:
+        return '💻';
+    }
+  };
+
   // Load items from SQLite DB
   const loadData = useCallback(async () => {
     const dbItems = await getDbItems();
@@ -177,7 +214,7 @@ export default function Home() {
         content: formContent,
         tag: formTag,
         type: 'snippet',
-        emoji: '⚛️',
+        emoji: getExtensionEmoji(fileExtension),
         createdAt: 'Just now',
         fileExtension: fileExtension,
       };

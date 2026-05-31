@@ -64,6 +64,43 @@ export default function Search() {
     return '.txt';
   };
 
+  const getExtensionEmoji = (ext: string | undefined): string => {
+    if (!ext) return '💻';
+    const cleanExt = ext.toLowerCase().trim();
+    switch (cleanExt) {
+      case '.py':
+        return '🐍';
+      case '.js':
+        return '🟨';
+      case '.ts':
+        return '🟦';
+      case '.jsx':
+      case '.tsx':
+        return '⚛️';
+      case '.html':
+        return '🌐';
+      case '.css':
+        return '🎨';
+      case '.json':
+        return '📦';
+      case '.sql':
+        return '🗄️';
+      case '.sh':
+      case '.bash':
+        return '🐚';
+      case '.rs':
+        return '🦀';
+      case '.go':
+        return '🐹';
+      case '.md':
+        return '📝';
+      case '.txt':
+        return '📄';
+      default:
+        return '💻';
+    }
+  };
+
   // Load items from SQLite DB
   const loadData = useCallback(async () => {
     const dbItems = await getDbItems();
@@ -130,7 +167,7 @@ export default function Search() {
       content: '',
       tag: 'React',
       type: 'snippet',
-      emoji: '💡',
+      emoji: getExtensionEmoji('.jsx'),
     });
     setFileExtension('.jsx');
     setIsEditingCode(true);
@@ -167,7 +204,7 @@ export default function Search() {
           content: editingItem.content || '',
           tag: editingItem.tag || 'React',
           type: editingItem.type || 'snippet',
-          emoji: editingItem.emoji || '💡',
+          emoji: editingItem.emoji || (editingItem.type === 'snippet' ? getExtensionEmoji(finalExtension) : '💡'),
           createdAt: 'Just now',
           fileExtension: finalExtension,
         };
@@ -277,7 +314,11 @@ export default function Search() {
                   <View style={styles.badgeRow}>
                     <View style={[styles.badge, styles.typeBadge]}>
                       <Text style={styles.badgeText}>
-                        {item.type === 'snippet' ? '⚛️ snippet' : item.type === 'link' ? '🔗 link' : '📝 note'}
+                        {item.type === 'snippet'
+                          ? `${getExtensionEmoji(item.fileExtension)} snippet`
+                          : item.type === 'link'
+                          ? '🔗 link'
+                          : '📝 note'}
                       </Text>
                     </View>
                     <View style={[styles.badge, styles.tagBadge]}>
@@ -392,7 +433,9 @@ export default function Search() {
                     
                     {editingItem?.type === 'snippet' && (
                       <View style={styles.fullPageBadge}>
-                        <Text style={styles.fullPageBadgeText}>💻 {fileExtension}</Text>
+                        <Text style={styles.fullPageBadgeText}>
+                          {getExtensionEmoji(fileExtension)} {fileExtension}
+                        </Text>
                       </View>
                     )}
 
@@ -691,7 +734,10 @@ export default function Search() {
                             styles.modalTagItem,
                             fileExtension === ext && styles.modalTagItemActive,
                           ]}
-                          onPress={() => setFileExtension(ext)}
+                          onPress={() => {
+                            setFileExtension(ext);
+                            setEditingItem((prev) => prev ? { ...prev, emoji: getExtensionEmoji(ext) } : prev);
+                          }}
                           activeOpacity={0.8}
                         >
                           <Text
